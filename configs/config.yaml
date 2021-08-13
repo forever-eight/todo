@@ -1,1 +1,8 @@
-port : "8000"
+port: "8000"
+
+db:
+    host: "localhost"
+    port: "5432"
+    username: "db-user"
+    dbname: "db-name"
+    sslmode: "disable"
