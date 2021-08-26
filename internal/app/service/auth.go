@@ -48,7 +48,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 		return "", err
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, &tokenClaims{
+	tokenSigner := jwt.NewWithClaims(jwt.SigningMethodHS512, &tokenClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(TokenTTL).Unix(), // время на 12 часов больше, чем сейчас
 			IssuedAt:  time.Now().Unix(),
@@ -56,6 +56,10 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 		UserId: user.Id,
 	})
 
-	return token.SignedString([]byte(signingKey))
+	token, err := tokenSigner.SignedString([]byte(signingKey))
+	if err != nil {
+		return "", fmt.Errorf("sign error: %w", err)
+	}
 
+	return token, nil
 }
