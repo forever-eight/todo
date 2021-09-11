@@ -12,6 +12,7 @@ type Authorisation interface {
 }
 
 type TodoList interface {
+	Create(id int, list ds.TodoList) (int, error)
 }
 
 type TodoItem interface {
