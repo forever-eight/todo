@@ -27,5 +27,6 @@ type Repository struct {
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorisation: NewAuthPostgres(db),
+		TodoList:      NewToDoListPostgres(db),
 	}
 }

@@ -26,6 +26,8 @@ type Service struct {
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		Authorisation: NewAuthService(repos.Authorisation)}
+		Authorisation: NewAuthService(repos.Authorisation),
+		TodoList:      NewToDoListService(repos.TodoList),
+	}
 
 }
