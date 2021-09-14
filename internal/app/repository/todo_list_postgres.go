@@ -2,8 +2,10 @@ package repository
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 
 	"github.com/forever-eight/todo.git/internal/app/ds"
 )
@@ -63,4 +65,51 @@ func (r *ToDoListPostgres) GetById(userId, listId int) (ds.TodoList, error) {
 	err := r.db.Get(&list, query, userId, listId)
 	fmt.Println(err)
 	return list, err
+}
+
+func (r *ToDoListPostgres) Delete(userId, id int) error {
+	query := fmt.Sprintf("DELETE FROM %s tl USING %s ul WHERE tl.id = ul.list_id AND ul.user_id = $1 AND ul.list_id = $2", todoListsTable, usersListsTable)
+	res, err := r.db.Exec(query, userId, id)
+
+	if res == nil {
+		fmt.Println("empty")
+		return fmt.Errorf("empty db")
+	}
+	return err
+}
+
+func (r *ToDoListPostgres) Update(userId, id int, input ds.UpdateListInput) error {
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argID := 1
+	if input.Title != nil {
+		// Добавляем значение арг сюда, то есть $1
+		setValues = append(setValues, fmt.Sprintf("title = $%d", argID))
+		// Сюда добавляем то, что хотим положить
+		args = append(args, *input.Title)
+		// Увеличиваем
+		argID++
+	}
+	if input.Description != nil {
+		// Добавляем значение арг сюда, то есть $1
+		setValues = append(setValues, fmt.Sprintf("description = $%d", argID))
+		// Сюда добавляем то, что хотим положить
+		args = append(args, *input.Description)
+		// Увеличиваем
+		argID++
+	}
+	// Соединяем строки. Пример
+	// title=$1
+	// title=$1, description=$2
+	setQuery := strings.Join(setValues, ", ")
+
+	query := fmt.Sprintf("UPDATE %s tl SET %s FROM %s ul WHERE tl.id = ul.list_id AND ul.list_id=$%d AND ul.user_id=$%d",
+		todoListsTable, setQuery, usersListsTable, argID, argID+1)
+	args = append(args, id, userId)
+
+	logrus.Debugf("updateQuery: %s", query)
+	logrus.Debugf("args: %s", args)
+
+	_, err := r.db.Exec(query, args...)
+	return err
 }

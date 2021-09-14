@@ -16,6 +16,7 @@ type TodoList interface {
 	GetAll(id int) ([]ds.TodoList, error)
 	GetById(userId, listId int) (ds.TodoList, error)
 	Delete(userId, id int) error
+	Update(userId, id int, input ds.UpdateListInput) error
 }
 
 type TodoItem interface {

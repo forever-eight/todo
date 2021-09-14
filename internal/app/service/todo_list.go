@@ -21,6 +21,18 @@ func (s *ToDoListService) GetAll(id int) ([]ds.TodoList, error) {
 	return s.r.GetAll(id)
 }
 
-func (s ToDoListService) GetById(userId, listId int) (ds.TodoList, error) {
+func (s *ToDoListService) GetById(userId, listId int) (ds.TodoList, error) {
 	return s.r.GetById(userId, listId)
+}
+
+func (s *ToDoListService) Delete(userId, id int) error {
+	return s.r.Delete(userId, id)
+}
+
+func (s *ToDoListService) Update(userId, id int, input ds.UpdateListInput) error {
+	err := input.Validate()
+	if err != nil {
+		return err
+	}
+	return s.r.Update(userId, id, input)
 }

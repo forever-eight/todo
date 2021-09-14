@@ -74,10 +74,6 @@ func (h *Handler) getListById(c *gin.Context) {
 }
 
 func (h *Handler) updateList(c *gin.Context) {
-
-}
-
-func (h *Handler) deleteList(c *gin.Context) {
 	userId, err := h.GetIntId(c)
 	if err != nil {
 		return
@@ -88,12 +84,45 @@ func (h *Handler) deleteList(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, "invalid id param")
 		return
 	}
-
-	err := h.services.TodoList.Delete(userId, id)
+	var input ds.UpdateListInput
+	err = c.BindJSON(&input)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	err = h.services.Update(userId, id, input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, list)
+	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
+}
+
+func (h *Handler) deleteList(c *gin.Context) {
+
+	userId, err := h.GetIntId(c)
+	if err != nil {
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, "invalid id param")
+		return
+	}
+	// Проверка
+	list, err := h.services.TodoList.GetById(userId, id)
+	empty := ds.TodoList{}
+	if list == empty {
+		newErrorResponse(c, http.StatusNotFound, "not found")
+		return
+	}
+	err = h.services.TodoList.Delete(userId, id)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }
