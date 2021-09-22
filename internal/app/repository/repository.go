@@ -20,6 +20,7 @@ type TodoList interface {
 }
 
 type TodoItem interface {
+	Create(userId, listId int, input ds.TodoItem) (int, error)
 }
 
 type Repository struct {
